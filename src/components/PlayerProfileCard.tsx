@@ -1,15 +1,24 @@
 import { Course, getTotalPar } from "@/lib/courseData";
+import { Flight } from "@/lib/playerStore";
 
 interface PlayerProfileCardProps {
   name: string;
   course: Course;
   scores: (number | null)[];
+  handicap: number;
+  flight: Flight;
 }
 
-export default function PlayerProfileCard({ name, course, scores }: PlayerProfileCardProps) {
+const flightColors: Record<Flight, string> = {
+  A: "bg-destructive text-destructive-foreground",
+  B: "bg-primary text-primary-foreground",
+  C: "bg-accent text-accent-foreground",
+};
+
+export default function PlayerProfileCard({ name, course, scores, handicap, flight }: PlayerProfileCardProps) {
   const totalScore = scores.reduce<number>((sum, s) => sum + (s ?? 0), 0);
   const totalPar = getTotalPar(course);
-  const diff = totalScore - totalPar;
+  const netScore = totalScore - handicap;
   const hasScores = scores.some((s) => s !== null);
 
   return (
@@ -22,19 +31,23 @@ export default function PlayerProfileCard({ name, course, scores }: PlayerProfil
         Course: <span className="font-semibold text-golf-gold">{course.name}</span>
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+      <div className="mt-4 grid grid-cols-4 gap-3 text-center">
         <div className="rounded-lg bg-primary-foreground/10 p-3">
           <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">Gross</p>
           <p className="text-xl font-bold">{hasScores ? totalScore : "–"}</p>
         </div>
         <div className="rounded-lg bg-primary-foreground/10 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">Par</p>
-          <p className="text-xl font-bold">{totalPar}</p>
+          <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">HDC</p>
+          <p className="text-xl font-bold">{handicap}</p>
         </div>
         <div className="rounded-lg bg-primary-foreground/10 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">+/–</p>
-          <p className="text-xl font-bold">
-            {hasScores ? (diff > 0 ? `+${diff}` : diff) : "–"}
+          <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">Net</p>
+          <p className="text-xl font-bold">{hasScores ? netScore : "–"}</p>
+        </div>
+        <div className="rounded-lg bg-primary-foreground/10 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">Flight</p>
+          <p className={`mt-0.5 inline-block rounded px-2 py-0.5 text-sm font-black ${flightColors[flight]}`}>
+            {flight}
           </p>
         </div>
       </div>

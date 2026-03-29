@@ -9,6 +9,7 @@ import ScoreTable from "@/components/ScoreTable";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 import Header from "@/components/Header";
+import { DEFAULT_COURSE_PAR } from "@/lib/flightUtils";
 
 export default function ScoreEntry() {
   const navigate = useNavigate();
@@ -17,23 +18,24 @@ export default function ScoreEntry() {
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
 
   useEffect(() => {
-    // ดึงข้อมูลสนามจาก LocalStorage
+    // 2. ดึงข้อมูลสนามจาก LocalStorage
     const savedCoursePar = localStorage.getItem("golf_course_par");
-    if (savedCoursePar) {
-      const parsedPar = JSON.parse(savedCoursePar);
-      const dynamicCourse: Course = {
-        id: "custom-profile",
-        name: "Custom Course",
-        holes: parsedPar.map((h: any) => ({
-          number: h.hole,
-          par: h.par,
-          handicap: h.hole 
-        }))
-      };
-      setSelectedCourse(dynamicCourse);
-    } else {
-      toast.error("Please set Course Profile in Flights page first");
+    const parsedPar = savedCoursePar ? JSON.parse(savedCoursePar) : DEFAULT_COURSE_PAR;
+    
+    if (!savedCoursePar) {
+      localStorage.setItem("golf_course_par", JSON.stringify(DEFAULT_COURSE_PAR));
     }
+
+    const dynamicCourse: Course = {
+      id: "custom-profile",
+      name: "Custom Course",
+      holes: parsedPar.map((h: any) => ({
+        number: h.hole,
+        par: h.par,
+        handicap: h.hole 
+      }))
+    };
+    setSelectedCourse(dynamicCourse);
   }, []);
 
   // HDC will be calculated on the Leaderboard page. Here we just set a default.

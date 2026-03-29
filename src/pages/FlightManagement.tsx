@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { getStoredConfig, FlightConfig } from "@/lib/flightUtils";
+import { getStoredConfig, FlightConfig, DEFAULT_COURSE_PAR } from "@/lib/flightUtils";
 import Header from "@/components/Header";
 
 // Define the shape for our course data
@@ -15,9 +15,7 @@ interface CourseHole {
 export default function FlightManagement() {
   const navigate = useNavigate();
   const [config, setConfig] = useState<FlightConfig[]>([]);
-  const [coursePar, setCoursePar] = useState<CourseHole[]>(
-    Array.from({ length: 18 }, (_, i) => ({ hole: i + 1, par: 4 }))
-  );
+  const [coursePar, setCoursePar] = useState<CourseHole[]>(DEFAULT_COURSE_PAR);
 
   useEffect(() => {
     setConfig(getStoredConfig());
@@ -25,6 +23,9 @@ export default function FlightManagement() {
     const savedCourse = localStorage.getItem("golf_course_par");
     if (savedCourse) {
       setCoursePar(JSON.parse(savedCourse));
+    } else {
+      // Set defaults if not present
+      localStorage.setItem("golf_course_par", JSON.stringify(DEFAULT_COURSE_PAR));
     }
   }, []);
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { courses, Course, getTotalPar } from "@/lib/courseData";
-import { savePlayer, Flight } from "@/lib/playerStore";
+import { savePlayer } from "@/lib/playerStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlayerProfileCard from "@/components/PlayerProfileCard";
@@ -9,15 +9,13 @@ import ScoreTable from "@/components/ScoreTable";
 import CourseSelector from "@/components/CourseSelector";
 import { toast } from "sonner";
 
-const flights: Flight[] = ["A", "B", "C"];
-
 export default function ScoreEntry() {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<Course>(courses[0]);
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
   const [handicap, setHandicap] = useState<number>(0);
-  const [flight, setFlight] = useState<Flight>("A");
+  const flight = "A"; // default, reassigned in Flight Management page
 
   const handleCourseChange = (course: Course) => {
     setSelectedCourse(course);
@@ -91,6 +89,9 @@ export default function ScoreEntry() {
             <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/")}>
               📝 Score
             </Button>
+            <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/flights")}>
+              ✈️ Flights
+            </Button>
             <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/leaderboard")}>
               🏆 Leaderboard
             </Button>
@@ -119,41 +120,17 @@ export default function ScoreEntry() {
           />
         </div>
 
-        {/* Flight & Handicap */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Flight</label>
-            <div className="flex gap-2">
-              {flights.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFlight(f)}
-                  className={`flex-1 rounded-lg border-2 py-2.5 text-sm font-bold transition-all ${
-                    flight === f
-                      ? f === "A"
-                        ? "border-destructive bg-destructive text-destructive-foreground"
-                        : f === "B"
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-muted-foreground hover:border-primary/50"
-                  }`}
-                >
-                  Flight {f}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Handicap (HDC)</label>
-            <Input
-              type="number"
-              min={0}
-              max={54}
-              value={handicap}
-              onChange={(e) => setHandicap(parseInt(e.target.value) || 0)}
-              className="text-base font-bold text-center"
-            />
-          </div>
+        {/* Handicap */}
+        <div className="max-w-xs">
+          <label className="mb-2 block text-sm font-semibold text-foreground">Handicap (HDC)</label>
+          <Input
+            type="number"
+            min={0}
+            max={54}
+            value={handicap}
+            onChange={(e) => setHandicap(parseInt(e.target.value) || 0)}
+            className="text-base font-bold text-center"
+          />
         </div>
 
         {/* Score Tables */}

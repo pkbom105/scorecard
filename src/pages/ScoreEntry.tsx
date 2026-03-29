@@ -9,13 +9,15 @@ import ScoreTable from "@/components/ScoreTable";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 import Header from "@/components/Header";
-import { DEFAULT_COURSE_PAR } from "@/lib/flightUtils";
+import { DEFAULT_COURSE_PAR, getStoredConfig, calculateSystem36Hdc, calculateFlightByHdc } from "@/lib/flightUtils";
 
 export default function ScoreEntry() {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
+  const [flightConfig, setFlightConfig] = useState(getStoredConfig());
+  const [coursePars, setCoursePars] = useState<number[]>([]);
 
   useEffect(() => {
     // 2. ดึงข้อมูลสนามจาก LocalStorage
@@ -25,6 +27,9 @@ export default function ScoreEntry() {
     if (!savedCoursePar) {
       localStorage.setItem("golf_course_par", JSON.stringify(DEFAULT_COURSE_PAR));
     }
+
+    setCoursePars(parsedPar.map((h: any) => h.par));
+    setFlightConfig(getStoredConfig());
 
     const dynamicCourse: Course = {
       id: "custom-profile",
@@ -38,8 +43,9 @@ export default function ScoreEntry() {
     setSelectedCourse(dynamicCourse);
   }, []);
 
-  // HDC will be calculated on the Leaderboard page. Here we just set a default.
-  const currentFlight = "N/A";
+  // Update real-time HDC and Flight
+  const currentHdc = calculateSystem36Hdc(scores, coursePars);
+  const currentFlight = calculateFlightByHdc(currentHdc, flightConfig);
 
   // --- ฟังก์ชันสำหรับดาวน์โหลดข้อมูลเป็น JSON ---
   const exportToJson = () => {
@@ -108,6 +114,8 @@ export default function ScoreEntry() {
           name={playerName} 
           course={selectedCourse} 
           scores={scores} 
+          handicap={currentHdc}
+          flight={currentFlight}
         />
 
         {/* Input ข้อมูลนักกอล์ฟ */}

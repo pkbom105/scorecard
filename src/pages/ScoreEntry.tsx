@@ -120,41 +120,17 @@ export default function ScoreEntry() {
           />
         </div>
 
-        {/* Flight & Handicap */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Flight</label>
-            <div className="flex gap-2">
-              {flights.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFlight(f)}
-                  className={`flex-1 rounded-lg border-2 py-2.5 text-sm font-bold transition-all ${
-                    flight === f
-                      ? f === "A"
-                        ? "border-destructive bg-destructive text-destructive-foreground"
-                        : f === "B"
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-muted-foreground hover:border-primary/50"
-                  }`}
-                >
-                  Flight {f}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Handicap (HDC)</label>
-            <Input
-              type="number"
-              min={0}
-              max={54}
-              value={handicap}
-              onChange={(e) => setHandicap(parseInt(e.target.value) || 0)}
-              className="text-base font-bold text-center"
-            />
-          </div>
+        {/* Handicap */}
+        <div className="max-w-xs">
+          <label className="mb-2 block text-sm font-semibold text-foreground">Handicap (HDC)</label>
+          <Input
+            type="number"
+            min={0}
+            max={54}
+            value={handicap}
+            onChange={(e) => setHandicap(parseInt(e.target.value) || 0)}
+            className="text-base font-bold text-center"
+          />
         </div>
 
         {/* Score Tables */}

@@ -15,7 +15,7 @@ export default function ScoreEntry() {
   const [selectedCourse, setSelectedCourse] = useState<Course>(courses[0]);
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
   const [handicap, setHandicap] = useState<number>(0);
-  const [flight, setFlight] = useState<Flight>("A");
+  const flight = "A"; // default, reassigned in Flight Management page
 
   const handleCourseChange = (course: Course) => {
     setSelectedCourse(course);

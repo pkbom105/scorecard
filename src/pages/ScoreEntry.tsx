@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { courses, Course, getTotalPar } from "@/lib/courseData";
-import { savePlayer, Flight } from "@/lib/playerStore";
+import { savePlayer } from "@/lib/playerStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlayerProfileCard from "@/components/PlayerProfileCard";
 import ScoreTable from "@/components/ScoreTable";
 import CourseSelector from "@/components/CourseSelector";
 import { toast } from "sonner";
-
-const flights: Flight[] = ["A", "B", "C"];
 
 export default function ScoreEntry() {
   const navigate = useNavigate();

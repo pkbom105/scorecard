@@ -40,3 +40,10 @@ export function deletePlayer(id: string) {
   const players = getPlayers().filter((p) => p.id !== id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
 }
+
+export function updatePlayerFlight(id: string, flight: Flight) {
+  const players = getPlayers().map((p) =>
+    p.id === id ? { ...p, flight } : p
+  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+}

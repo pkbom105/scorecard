@@ -1,3 +1,5 @@
+export type Flight = "A" | "B" | "C";
+
 export interface PlayerScore {
   id: string;
   name: string;
@@ -6,6 +8,8 @@ export interface PlayerScore {
   scores: (number | null)[];
   totalScore: number;
   totalPar: number;
+  handicap: number;
+  flight: Flight;
   createdAt: string;
 }
 

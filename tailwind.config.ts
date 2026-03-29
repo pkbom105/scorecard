@@ -57,6 +57,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        golf: {
+          gold: "hsl(var(--golf-gold))",
+          dark: "hsl(var(--golf-dark))",
+          "green-light": "hsl(var(--golf-green-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

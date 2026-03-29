@@ -1,41 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { courses, Course, getTotalPar } from "@/lib/courseData";
-import { savePlayer } from "@/lib/playerStore";
+import { Course, getTotalPar } from "@/lib/courseData"; 
+import { savePlayer, getPlayers } from "@/lib/playerStore"; // เพิ่ม getPlayers มาเพื่อใช้ตอน export
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlayerProfileCard from "@/components/PlayerProfileCard";
 import ScoreTable from "@/components/ScoreTable";
-import CourseSelector from "@/components/CourseSelector";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+import Header from "@/components/Header";
 
 export default function ScoreEntry() {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<Course>(courses[0]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
-  const [handicap, setHandicap] = useState<number>(0);
-  const flight = "A"; // default, reassigned in Flight Management page
 
-  const handleCourseChange = (course: Course) => {
-    setSelectedCourse(course);
-    setScores(Array(18).fill(null));
+  useEffect(() => {
+    // ดึงข้อมูลสนามจาก LocalStorage
+    const savedCoursePar = localStorage.getItem("golf_course_par");
+    if (savedCoursePar) {
+      const parsedPar = JSON.parse(savedCoursePar);
+      const dynamicCourse: Course = {
+        id: "custom-profile",
+        name: "Custom Course",
+        holes: parsedPar.map((h: any) => ({
+          number: h.hole,
+          par: h.par,
+          handicap: h.hole 
+        }))
+      };
+      setSelectedCourse(dynamicCourse);
+    } else {
+      toast.error("Please set Course Profile in Flights page first");
+    }
+  }, []);
+
+  // HDC will be calculated on the Leaderboard page. Here we just set a default.
+  const currentFlight = "N/A";
+
+  // --- ฟังก์ชันสำหรับดาวน์โหลดข้อมูลเป็น JSON ---
+  const exportToJson = () => {
+    const allPlayers = getPlayers();
+    if (allPlayers.length === 0) {
+      toast.error("No player data to export");
+      return;
+    }
+
+    const dataStr = JSON.stringify(allPlayers, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `golf-scores-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    toast.success("JSON file exported!");
   };
 
-  const handleScoreChange = (index: number, value: number | null) => {
-    setScores((prev) => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
-    });
-  };
-
-  const handleSave = () => {
+  const handleSave = (shouldNavigate = false) => {
     if (!playerName.trim()) {
       toast.error("Please enter a player name");
       return;
     }
+    if (!selectedCourse) return;
+
     const totalScore = scores.reduce<number>((sum, s) => sum + (s ?? 0), 0);
+    
+    // บันทึกลง store (ซึ่งมักจะบันทึกลง localStorage ให้อยู่แล้ว)
     savePlayer({
       name: playerName.trim(),
       courseId: selectedCourse.id,
@@ -43,109 +76,78 @@ export default function ScoreEntry() {
       scores: [...scores],
       totalScore,
       totalPar: getTotalPar(selectedCourse),
-      handicap,
-      flight,
+      handicap: 0, // Handicap is calculated on the Leaderboard
+      flight: "C", // Flight is assigned on the Leaderboard
     });
-    toast.success(`${playerName} saved!`);
-    setPlayerName("");
-    setScores(Array(18).fill(null));
-    setHandicap(0);
-  };
 
-  const handleSaveAndView = () => {
-    if (!playerName.trim()) {
-      toast.error("Please enter a player name");
-      return;
+    toast.success(`${playerName} saved!`);
+    
+    if (shouldNavigate) {
+      navigate("/leaderboard");
+    } else {
+      setPlayerName("");
+      setScores(Array(18).fill(null));
     }
-    const totalScore = scores.reduce<number>((sum, s) => sum + (s ?? 0), 0);
-    savePlayer({
-      name: playerName.trim(),
-      courseId: selectedCourse.id,
-      courseName: selectedCourse.name,
-      scores: [...scores],
-      totalScore,
-      totalPar: getTotalPar(selectedCourse),
-      handicap,
-      flight,
-    });
-    toast.success(`${playerName} saved!`);
-    navigate("/leaderboard");
   };
 
-  const front9 = selectedCourse.holes.slice(0, 9);
-  const back9 = selectedCourse.holes.slice(9, 18);
-  const totalScore = scores.reduce<number>((sum, s) => sum + (s ?? 0), 0);
-  const netScore = totalScore - handicap;
+  if (!selectedCourse) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-golf-dark text-primary-foreground">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-black tracking-tight">
-            GOLF <span className="text-golf-gold">SCORER</span>
-          </h1>
-          <nav className="flex gap-2">
-            <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/")}>
-              📝 Score
-            </Button>
-            <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/flights")}>
-              ✈️ Flights
-            </Button>
-            <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/leaderboard")}>
-              🏆 Leaderboard
-            </Button>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <Header>
+        <Button variant="outline" size="sm" className="ml-2 text-white border-white/20" onClick={exportToJson}>
+          <Download className="w-4 h-4 mr-1" /> JSON
+        </Button>
+      </Header>
 
       <main className="container mx-auto max-w-3xl px-4 py-6 space-y-6">
         {/* Profile Card */}
-        <PlayerProfileCard name={playerName} course={selectedCourse} scores={scores} handicap={handicap} flight={flight} />
+        <PlayerProfileCard 
+          name={playerName} 
+          course={selectedCourse} 
+          scores={scores} 
+        />
 
-        {/* Course Selector */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-foreground">Select Golf Course</label>
-          <CourseSelector selectedCourse={selectedCourse} onSelect={handleCourseChange} />
+        {/* Input ข้อมูลนักกอล์ฟ */}
+        <div className="bg-card p-6 rounded-2xl border shadow-sm flex flex-col items-center">
+          <div className="w-full max-w-sm">
+            <label className="text-xs font-bold uppercase text-muted-foreground">Player Name</label>
+            <Input value={playerName} onChange={(e) => setPlayerName(e.target.value)} className="mt-1" placeholder="Enter player name" />
+          </div>
         </div>
 
-        {/* Player Name */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-foreground">Player Name</label>
-          <Input
-            placeholder="Enter player name..."
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="text-base font-medium"
-          />
-        </div>
-
-        {/* Handicap */}
-        <div className="max-w-xs">
-          <label className="mb-2 block text-sm font-semibold text-foreground">Handicap (HDC)</label>
-          <Input
-            type="number"
-            min={0}
-            max={54}
-            value={handicap}
-            onChange={(e) => setHandicap(parseInt(e.target.value) || 0)}
-            className="text-base font-bold text-center"
-          />
-        </div>
-
-        {/* Score Tables */}
+        {/* ตารางคะแนน */}
         <div className="grid gap-4 md:grid-cols-2">
-          <ScoreTable holes={front9} scores={scores} onScoreChange={handleScoreChange} startIndex={0} label="Front 9 (OUT)" />
-          <ScoreTable holes={back9} scores={scores} onScoreChange={handleScoreChange} startIndex={9} label="Back 9 (IN)" />
+          <ScoreTable 
+            holes={selectedCourse.holes.slice(0, 9)} 
+            scores={scores} 
+            onScoreChange={(i, v) => {
+              const newScores = [...scores];
+              newScores[i] = v;
+              setScores(newScores);
+            }} 
+            startIndex={0} 
+            label="Front 9" 
+          />
+          <ScoreTable 
+            holes={selectedCourse.holes.slice(9, 18)} 
+            scores={scores} 
+            onScoreChange={(i, v) => {
+              const newScores = [...scores];
+              newScores[i] = v;
+              setScores(newScores);
+            }} 
+            startIndex={9} 
+            label="Back 9" 
+          />
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3">
-          <Button variant="golf" size="lg" className="flex-1" onClick={handleSave}>
-            💾 Save & Add Next Player
+          <Button variant="default" className="flex-1 h-12 text-lg font-bold" onClick={() => handleSave(false)}>
+            💾 Save & Next
           </Button>
-          <Button variant="gold" size="lg" onClick={handleSaveAndView}>
-            🏆 Save & View Leaderboard
+          <Button variant="secondary" className="h-12" onClick={() => handleSave(true)}>
+            🏆 Leaderboard
           </Button>
         </div>
       </main>

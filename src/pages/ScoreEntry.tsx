@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Course, getTotalPar } from "@/lib/courseData"; 
-import { savePlayer, getPlayers } from "@/lib/playerStore"; // เพิ่ม getPlayers มาเพื่อใช้ตอน export
+import { savePlayer } from "@/lib/playerStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlayerProfileCard from "@/components/PlayerProfileCard";
 import ScoreTable from "@/components/ScoreTable";
 import { toast } from "sonner";
-import { Download } from "lucide-react";
 import Header from "@/components/Header";
 import { DEFAULT_COURSE_PAR, getStoredConfig, calculateSystem36Hdc, calculateFlightByHdc } from "@/lib/flightUtils";
 
@@ -47,26 +46,6 @@ export default function ScoreEntry() {
   const currentHdc = calculateSystem36Hdc(scores, coursePars);
   const currentFlight = calculateFlightByHdc(currentHdc, flightConfig);
 
-  // --- ฟังก์ชันสำหรับดาวน์โหลดข้อมูลเป็น JSON ---
-  const exportToJson = () => {
-    const allPlayers = getPlayers();
-    if (allPlayers.length === 0) {
-      toast.error("No player data to export");
-      return;
-    }
-
-    const dataStr = JSON.stringify(allPlayers, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `golf-scores-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    toast.success("JSON file exported!");
-  };
-
   const handleSave = (shouldNavigate = false) => {
     if (!playerName.trim()) {
       toast.error("Please enter a player name");
@@ -103,9 +82,6 @@ export default function ScoreEntry() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header>
-        <Button variant="outline" size="sm" className="ml-2 text-white border-white/20" onClick={exportToJson}>
-          <Download className="w-4 h-4 mr-1" /> JSON
-        </Button>
       </Header>
 
       <main className="container mx-auto max-w-3xl px-4 py-6 space-y-6">

@@ -15,7 +15,8 @@ export default function Header({ children }: { children?: React.ReactNode }) {
   return (
     <header className="border-b bg-golf-dark text-white p-4 sticky top-0 z-20 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="font-black text-xl tracking-tighter uppercase">
+        <h1 className="font-black text-xl tracking-tighter uppercase flex items-center gap-2">
+          <img src="/logo-pannavith.png" alt="Logo" className="h-20 w-auto mr-3" />
           Score <span className="text-golf-gold">Card</span>
         </h1>
         {/* Navigation Menu */}

@@ -14,13 +14,13 @@ export default function Header({ children }: { children?: React.ReactNode }) {
 
   return (
     <header className="border-b bg-golf-dark text-white p-4 sticky top-0 z-20 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <h1 className="font-black text-xl tracking-tighter uppercase flex items-center gap-2">
           <img src="/logo-pannavith.png" alt="Logo" className="h-20 w-auto mr-3" />
           Score <span className="text-golf-gold">Card</span>
         </h1>
-        {/* Navigation Menu */}
-        <nav className="flex items-center gap-1 sm:gap-3">
+        {/* Navigation Menu - on mobile, appears below logo */}
+        <nav className="flex items-center justify-center sm:justify-end gap-1 sm:gap-3">
           <Button
             variant="ghost"
             size="sm"
